@@ -55,39 +55,42 @@
   function status(text,error=false){if(!panel)return;const el=panel.querySelector('#ch-status');el.textContent=text;el.style.color=error?'#f38ba8':'#f5c979';}
   function initEngine(){
     if(worker)return;
-    try {
-      // Content scripts cannot always launch a worker directly from chrome-extension://
-      // because the page origin owns the Worker constructor. A blob bootstrap imports
-      // the web-accessible engine from the extension origin.
-      const engineUrl = chrome.runtime.getURL('vendor/stockfish-19-lite-single.js');
-      const bootstrap = new Blob([`importScripts("${engineUrl}");`], { type: 'text/javascript' });
-      worker = new Worker(URL.createObjectURL(bootstrap));
-      worker.addEventListener('error', e => {
-        status('Stockfish worker failed to load. Check extension/vendor files and reload the extension.', true);
-        console.error('Chess Helper Stockfish worker error:', e.message, e.filename, e.lineno);
-      });
-    } catch(e) {
-      status('Could not start Stockfish: ' + (e.message || 'worker blocked'), true);
-      console.error('Chess Helper could not start Stockfish:', e);
-      return;
+    // Bridge the engine through an extension-origin iframe. A Worker created by a
+    // Chess.com content script inherits page-origin restrictions; the iframe gives
+    // Stockfish an extension origin so its WASM asset resolves correctly.
+    let frame = document.getElementById('ch-helper-engine-frame');
+    if (!frame) {
+      frame = document.createElement('iframe');
+      frame.id = 'ch-helper-engine-frame';
+      frame.src = chrome.runtime.getURL('engine-host.html');
+      Object.assign(frame.style,{position:'fixed',width:'1px',height:'1px',opacity:'0',pointerEvents:'none',left:'-10px',top:'-10px',border:'0'});
+      frame.setAttribute('aria-hidden','true');
+      document.documentElement.appendChild(frame);
     }
-    worker.addEventListener('message',e=>{
-      const line=String(e.data||'');
-      if(line==='uciok'){uciReady=true;worker.postMessage('isready');}
+    const onMessage = event => {
+      if (event.source !== frame.contentWindow || !event.data || event.data.channel !== 'ch-helper-engine') return;
+      const line = String(event.data.line || '');
+      if(line==='uciok'){uciReady=true;frame.contentWindow.postMessage({channel:'ch-helper-command',command:'isready'},'*');}
       else if(line==='readyok'){ready=true;if(pending){const p=pending;pending=null;startSearch(p.fen,p.force);}}
       else if(line.startsWith('bestmove ')){
-        busy=false;const uci=line.split(/\s+/)[1];
+        busy=false;const uci=line.split(/\\s+/)[1];
         if(!uci||uci==='(none)'){status('No legal move found.');return;}
         lastMove={from:uci.slice(0,2),to:uci.slice(2,4),uci};
         panel.querySelector('#ch-move').textContent=lastMove.from+' → '+lastMove.to;
         panel.querySelector('#ch-detail').textContent='Engine move · depth '+depth;
         drawArrow(lastMove);status('Best move ready');
+      } else if(line.startsWith('info depth ')){
+        const m=line.match(/\\bdepth\\s+(\\d+)/);if(m)status('Analyzing… depth '+m[1]);
+      } else if(event.data.error) {
+        status('Stockfish error: '+event.data.error,true);
       }
-      else if(line.startsWith('info depth ')){
-        const m=line.match(/\bdepth\s+(\d+)/);if(m)status('Analyzing… depth '+m[1]);
-      }
-    });
-    worker.postMessage('uci');
+    };
+    window.addEventListener('message',onMessage);
+    frame.addEventListener('load',()=> {
+      worker = { postMessage: command => frame.contentWindow.postMessage({channel:'ch-helper-command',command}, '*') };
+      worker.postMessage('uci');
+    },{once:true});
+    frame.addEventListener('error',()=>status('Could not load engine host. Reload the extension.',true),{once:true});
   }
   function analyze(fen,force){
     if(!panel)return;
