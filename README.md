@@ -1,31 +1,61 @@
 # Chess Helper
 
-Always-on-top Electron desktop chess analysis app with an interactive board, Stockfish WASM engine, top-three candidate moves, move arrows, evaluation, depth control, FEN import/export, undo/reset, and global hide/show shortcut.
+Chess Helper now has **two editions**:
 
-## Run locally
+- **Browser web app** in `web/`: interactive chessboard, Stockfish 19 WASM analysis, top-three candidate moves, colored arrows, evaluation bar, depth control, FEN import/export, undo/reset. This edition can be hosted on Render as a static site.
+- **Electron desktop app** in the repository root: always-on-top window, global hide/show shortcut, and desktop installer configuration.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ManikandanP24/chess)
+
+## Deploy the web app to Render
+
+The repository includes `render.yaml` for a Render Static Site.
+
+1. Click **Deploy to Render** above, or open [Render New Blueprint](https://dashboard.render.com/blueprints).
+2. Connect the GitHub repository `ManikandanP24/chess`.
+3. Review the `chess-helper-web` static site service described by `render.yaml`, then create/deploy it.
+4. Wait for the build to finish. Render will provide an `onrender.com` URL.
+5. Future commits to `main` are configured for automatic redeployment.
+
+Build command: `npm install && npm run build:web`  
+Publish directory: `web`
+
+The build script bundles `chess.js` for the browser and copies the matching Stockfish 19.0.1 single-threaded WASM engine files from the installed npm package into `web/vendor/`. The JavaScript worker and matching `.wasm` file are served from the same origin. This lite single-threaded build does not require cross-origin isolation headers. Stockfish's browser package documents the matching JS/WASM filename pair and the single-threaded engine's compatibility with static hosts.
+
+## Test the web build locally
 
 Requirements: Node.js 20+ and npm.
 
 ```bash
 npm install
+npm run build:web
+```
+
+Then serve the `web/` directory over HTTP (don't open the HTML directly using `file://`):
+
+```bash
+npx serve web
+```
+
+Open the local URL printed by the server. Browser Worker and WASM loading require HTTP(S).
+
+## Web app controls
+
+- Click a piece and then a legal destination square.
+- **White view / Black view** flips board orientation.
+- **Undo** and **Reset** manage the position.
+- Paste a FEN and select **Load FEN**; **Copy current FEN** copies the current position.
+- Click a candidate move row to emphasize its arrow.
+- Use the depth slider to trade analysis speed for search depth.
+
+## Desktop app
+
+```bash
 npm start
 ```
 
-Stockfish 19.0.1's Node API is used in the Electron main process and resolves the matching engine/WASM assets from the package. This avoids manually copying mismatched WASM files and avoids a browser Worker attempting to load WASM through a `file://` URL. The `lite-single` variant is single-threaded and does not depend on cross-origin isolation.
+Build platform installers with `npm run dist`. The Electron app remains separate from the browser-hosted edition.
 
-## Controls
+## License
 
-- Click a piece and a legal destination square.
-- White/Black flips board orientation.
-- Undo and Reset manage the position.
-- Paste a FEN and press **Load FEN**; **Copy current FEN** copies the current position.
-- Candidate move rows prioritize their arrow.
-- Ctrl+Shift+H hides or restores the window.
-
-## Desktop releases
-
-This is a desktop app, not a static website. A GitHub Actions workflow builds Windows NSIS `.exe`, macOS `.dmg`, and Linux `.AppImage` artifacts. Push a tag such as `v1.0.0` to create a GitHub Release draft with attached installers. Review and publish the release from GitHub Releases.
-
-## License note
-
-Stockfish is GPL-3.0. Review the Stockfish and dependency license terms, include required notices/source offers where applicable, and verify obligations before redistributing binaries.
+Stockfish.js is GPL-3.0. Review its license and include required notices/source availability when redistributing or hosting binaries, as applicable.
