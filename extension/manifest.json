@@ -28,7 +28,9 @@
     {
       "resources": [
         "vendor/stockfish-19-lite-single.js",
-        "vendor/stockfish-19-lite-single.wasm"
+        "vendor/stockfish-19-lite-single.wasm",
+        "engine-host.html",
+        "engine-host.js"
       ],
       "matches": [
         "https://www.chess.com/*"
