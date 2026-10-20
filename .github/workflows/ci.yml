@@ -14,10 +14,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
-      - run: npm install
-      - name: Check JavaScript syntax
+      - name: Install dependencies
+        run: npm install
+      - name: Check desktop JavaScript syntax
         run: |
           node --check main.js
           node --check preload.js
           node --check renderer.js
+      - name: Build browser app and verify Stockfish assets
+        run: |
+          npm run build:web
+          test -s web/app.js
+          test -s web/vendor/stockfish-19-lite-single.js
+          test -s web/vendor/stockfish-19-lite-single.wasm
