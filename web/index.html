@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#171923">
+  <title>Chess Helper — Browser Analysis</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-icon">♞</span><div><strong>Chess Helper</strong><small>POSITION ANALYSIS</small></div></div>
+      <span id="engineStatus" class="status">Loading Stockfish…</span>
+    </header>
+    <section class="toolbar">
+      <div class="side-toggle"><button id="whiteBtn" class="selected">White view</button><button id="blackBtn">Black view</button></div>
+      <button id="undoBtn" class="secondary">↶ Undo</button>
+      <button id="resetBtn" class="secondary">Reset</button>
+    </section>
+    <section class="board-shell">
+      <div id="board" aria-label="Interactive chessboard"></div>
+      <svg id="arrows" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+    </section>
+    <section class="eval-panel">
+      <div class="eval-label"><span>Evaluation (White perspective)</span><strong id="evalText">—</strong></div>
+      <div class="eval-track"><div id="evalBar"></div></div>
+    </section>
+    <section class="panel">
+      <div class="panel-heading"><h2>Best moves</h2><span>Click a row to emphasize its arrow</span></div>
+      <div id="moves" class="moves"><p class="muted">Waiting for engine analysis…</p></div>
+      <div class="depth-control"><label for="depth">Analysis depth <strong id="depthValue">14</strong></label><input id="depth" type="range" min="8" max="20" value="14"></div>
+    </section>
+    <section class="panel fen-panel">
+      <div class="panel-heading"><h2>FEN position</h2><span>Import or export a position</span></div>
+      <textarea id="fenInput" rows="2" spellcheck="false" aria-label="FEN position" placeholder="Paste FEN here…"></textarea>
+      <div class="fen-actions"><button id="loadFenBtn" class="primary">Load FEN</button><button id="copyFenBtn" class="secondary">Copy current FEN</button></div>
+      <p id="message" role="status"></p>
+    </section>
+    <footer>Runs in your browser · Stockfish WASM · For study and post-game analysis</footer>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>
