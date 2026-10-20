@@ -112,8 +112,28 @@
     if(p.fen!==currentFen&&auto){clearTimeout(scan.timer);scan.timer=setTimeout(()=>{const now=getPosition();if(now&&now.fen!==currentFen)analyze(now.fen,false);},350);}
     else if(!currentFen)status('Board detected. Starting analysis…');
   }
-  makePanel();initEngine();
-  const observer=new MutationObserver(()=>scan());
-  observer.observe(document.body,{subtree:true,childList:true,attributes:true,attributeFilter:['class']});
-  setTimeout(scan,500);setTimeout(scan,1500);setTimeout(scan,3000);
+  makePanel();
+  // Avoid observing the entire Chess.com DOM, which changes constantly during play.
+  // Poll lightly and only start the engine after a position is found.
+  let previousBoard = null;
+  let scanBusy = false;
+  const safeScan = () => {
+    if (scanBusy) return;
+    scanBusy = true;
+    try {
+      const board = findBoard();
+      if (board !== previousBoard) {
+        previousBoard = board;
+        currentFen = '';
+      }
+      scan();
+    } catch (err) {
+      status('Board scan hiccup. Try Find Best Move.', true);
+    } finally {
+      scanBusy = false;
+    }
+  };
+  setTimeout(safeScan, 1200);
+  setTimeout(safeScan, 3000);
+  setInterval(safeScan, 1800);
 })();
