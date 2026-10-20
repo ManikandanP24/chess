@@ -55,8 +55,22 @@
   function status(text,error=false){if(!panel)return;const el=panel.querySelector('#ch-status');el.textContent=text;el.style.color=error?'#f38ba8':'#f5c979';}
   function initEngine(){
     if(worker)return;
-    try{worker=new Worker(chrome.runtime.getURL('vendor/stockfish-19-lite-single.js'));}
-    catch(e){status('Could not start Stockfish. Rebuild the extension.',true);return;}
+    try {
+      // Content scripts cannot always launch a worker directly from chrome-extension://
+      // because the page origin owns the Worker constructor. A blob bootstrap imports
+      // the web-accessible engine from the extension origin.
+      const engineUrl = chrome.runtime.getURL('vendor/stockfish-19-lite-single.js');
+      const bootstrap = new Blob([`importScripts("${engineUrl}");`], { type: 'text/javascript' });
+      worker = new Worker(URL.createObjectURL(bootstrap));
+      worker.addEventListener('error', e => {
+        status('Stockfish worker failed to load. Check extension/vendor files and reload the extension.', true);
+        console.error('Chess Helper Stockfish worker error:', e.message, e.filename, e.lineno);
+      });
+    } catch(e) {
+      status('Could not start Stockfish: ' + (e.message || 'worker blocked'), true);
+      console.error('Chess Helper could not start Stockfish:', e);
+      return;
+    }
     worker.addEventListener('message',e=>{
       const line=String(e.data||'');
       if(line==='uciok'){uciReady=true;worker.postMessage('isready');}
