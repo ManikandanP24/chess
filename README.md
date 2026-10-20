@@ -1,61 +1,53 @@
 # Chess Helper
 
-Chess Helper now has **two editions**:
+Chess Helper includes a browser analysis page, a Chrome extension prototype, and the existing Electron desktop app.
 
-- **Browser web app** in `web/`: interactive chessboard, Stockfish 19 WASM analysis, top-three candidate moves, colored arrows, evaluation bar, depth control, FEN import/export, undo/reset. This edition can be hosted on Render as a static site.
-- **Electron desktop app** in the repository root: always-on-top window, global hide/show shortcut, and desktop installer configuration.
+- **Chrome extension** in `extension/`: popup controls, Stockfish analysis, best-move arrow overlay on Chess.com, FEN input, depth control, and an auto-move option restricted to recognized bot-game/puzzle URLs.
+- **Browser web app** in `web/`: interactive chessboard, Stockfish WASM analysis, top-three candidate moves, arrows, evaluation bar, depth control, and FEN import/export. Hostable on Render.
+- **Electron desktop app** in the repository root: always-on-top window and desktop installer configuration.
 
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ManikandanP24/chess)
-
-## Deploy the web app to Render
-
-The repository includes `render.yaml` for a Render Static Site.
-
-1. Click **Deploy to Render** above, or open [Render New Blueprint](https://dashboard.render.com/blueprints).
-2. Connect the GitHub repository `ManikandanP24/chess`.
-3. Review the `chess-helper-web` static site service described by `render.yaml`, then create/deploy it.
-4. Wait for the build to finish. Render will provide an `onrender.com` URL.
-5. Future commits to `main` are configured for automatic redeployment.
-
-Build command: `npm install && npm run build:web`  
-Publish directory: `web`
-
-The build script bundles `chess.js` for the browser and copies the matching Stockfish 19.0.1 single-threaded WASM engine files from the installed npm package into `web/vendor/`. The JavaScript worker and matching `.wasm` file are served from the same origin. This lite single-threaded build does not require cross-origin isolation headers. Stockfish's browser package documents the matching JS/WASM filename pair and the single-threaded engine's compatibility with static hosts.
-
-## Test the web build locally
+## Build
 
 Requirements: Node.js 20+ and npm.
 
 ```bash
 npm install
 npm run build:web
+npm run build:extension
 ```
 
-Then serve the `web/` directory over HTTP (don't open the HTML directly using `file://`):
+The extension build creates the matching Stockfish 19.0.1 JavaScript/WASM assets under `extension/vendor/` and bundles the popup script.
 
-```bash
-npx serve web
-```
+## Load the Chrome extension locally
 
-Open the local URL printed by the server. Browser Worker and WASM loading require HTTP(S).
+1. Run `npm install` and `npm run build:extension`.
+2. Open `chrome://extensions` in Chrome.
+3. Enable **Developer mode**.
+4. Choose **Load unpacked** and select this repository's `extension/` folder.
+5. Open a Chess.com game or puzzle and click the Chess Helper extension icon.
 
-## Web app controls
+The extension attempts to read the board's piece classes to build a FEN. If board detection is unavailable, paste a FEN position into the popup. Board markup can change over time, so test it against the current Chess.com interface. Best-move analysis is intended for study and practice; auto-move is limited to recognized bot-game and puzzle URLs and should not be used in live games against people.
 
-- Click a piece and then a legal destination square.
-- **White view / Black view** flips board orientation.
-- **Undo** and **Reset** manage the position.
-- Paste a FEN and select **Load FEN**; **Copy current FEN** copies the current position.
-- Click a candidate move row to emphasize its arrow.
-- Use the depth slider to trade analysis speed for search depth.
+## Deploy the browser analysis page to Render
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ManikandanP24/chess)
+
+The repository includes `render.yaml` for the `chess-helper-web` static site.
+
+1. Click **Deploy to Render** above or open [Render Blueprints](https://dashboard.render.com/blueprints).
+2. Connect `ManikandanP24/chess`, review the static-site service, and create/deploy it.
+3. Wait for the build and use the public `.onrender.com` URL.
+
+Build command: `npm install && npm run build:web`  
+Publish directory: `web`
 
 ## Desktop app
 
 ```bash
 npm start
+npm run dist
 ```
-
-Build platform installers with `npm run dist`. The Electron app remains separate from the browser-hosted edition.
 
 ## License
 
-Stockfish.js is GPL-3.0. Review its license and include required notices/source availability when redistributing or hosting binaries, as applicable.
+Stockfish.js is GPL-3.0. Review the license and include required notices/source availability when redistributing or hosting binaries, as applicable.
