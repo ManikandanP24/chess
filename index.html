@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chess Helper</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header id="titlebar">
+    <div class="brand"><span class="brand-icon">♞</span><span>Chess Helper <small>ANALYSIS</small></span></div>
+    <div class="window-actions"><button id="minimizeBtn" title="Hide window">—</button><button id="closeBtn" title="Hide (Ctrl+Shift+H)">×</button></div>
+  </header>
+  <main>
+    <section class="toolbar">
+      <div class="side-toggle"><button id="whiteBtn" class="selected">White</button><button id="blackBtn">Black</button></div>
+      <button id="undoBtn" class="secondary">↶ Undo</button><button id="resetBtn" class="secondary">Reset</button>
+    </section>
+    <section class="board-wrap"><div id="board" aria-label="Chess board"></div></section>
+    <section class="eval-section">
+      <div class="eval-label"><span>Evaluation</span><strong id="evalText">Analyzing…</strong></div>
+      <div class="eval-track"><div id="evalBar"></div></div>
+    </section>
+    <section class="analysis-section">
+      <div class="section-heading"><h2>Best moves</h2><span id="engineStatus" class="status">Starting engine…</span></div>
+      <div id="moves" class="moves"><div class="empty">Waiting for engine analysis…</div></div>
+      <div class="depth-row"><label for="depth">Search depth <strong id="depthValue">14</strong></label><input id="depth" type="range" min="8" max="20" value="14"></div>
+    </section>
+    <section class="fen-section">
+      <div class="section-heading"><h2>Position (FEN)</h2><span class="muted">Import / copy</span></div>
+      <textarea id="fenInput" rows="2" spellcheck="false" placeholder="Paste a FEN position here…"></textarea>
+      <div class="fen-actions"><button id="loadFenBtn" class="secondary">Load FEN</button><button id="copyFenBtn" class="secondary">Copy current FEN</button></div>
+      <p id="message" role="status"></p>
+    </section>
+    <footer>For study and post-game analysis · Ctrl+Shift+H to hide/show</footer>
+  </main>
+  <script src="renderer.js"></script>
+</body>
+</html>
