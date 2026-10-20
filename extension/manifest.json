@@ -11,8 +11,7 @@
     "https://www.chess.com/*"
   ],
   "action": {
-    "default_title": "Chess Helper",
-    "default_popup": "popup.html"
+    "default_title": "Chess Helper — panel appears on Chess.com"
   },
   "content_scripts": [
     {
