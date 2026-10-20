@@ -119,9 +119,9 @@
     const point=s=>({x:((s.charCodeAt(0)-97)+.5)*12.5,y:(8-Number(s[1])+.5)*12.5});
     const a=point(move.from),b=point(move.to),ns='http://www.w3.org/2000/svg';
     const defs=document.createElementNS(ns,'defs'),mark=document.createElementNS(ns,'marker');
-    mark.setAttribute('id','ch-helper-arrowhead');mark.setAttribute('markerWidth','5');mark.setAttribute('markerHeight','5');mark.setAttribute('refX','4');mark.setAttribute('refY','2.5');mark.setAttribute('orient','auto');
-    const tip=document.createElementNS(ns,'path');tip.setAttribute('d','M0,0 L5,2.5 L0,5 Z');tip.setAttribute('fill','#f5c979');mark.appendChild(tip);defs.appendChild(mark);arrow.appendChild(defs);
-    const line=document.createElementNS(ns,'line');Object.entries({x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'#f5c979','stroke-width':'2.2','stroke-linecap':'round','marker-end':'url(#ch-helper-arrowhead)'}).forEach(([k,v])=>line.setAttribute(k,v));arrow.appendChild(line);board.appendChild(arrow);
+    mark.setAttribute('id','ch-helper-arrowhead');mark.setAttribute('markerWidth','3.2');mark.setAttribute('markerHeight','3.2');mark.setAttribute('refX','2.8');mark.setAttribute('refY','1.6');mark.setAttribute('orient','auto');
+    const tip=document.createElementNS(ns,'path');tip.setAttribute('d','M0,0 L3.2,1.6 L0,3.2 Z');tip.setAttribute('fill','#f5c979');mark.appendChild(tip);defs.appendChild(mark);arrow.appendChild(defs);
+    const line=document.createElementNS(ns,'line');Object.entries({x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:'#f5c979','stroke-width':'1.05','stroke-linecap':'round','marker-end':'url(#ch-helper-arrowhead)'}).forEach(([k,v])=>line.setAttribute(k,v));arrow.appendChild(line);board.appendChild(arrow);const drawnArrow=arrow;setTimeout(()=>{if(arrow===drawnArrow)clearArrow();},3000);
   }
   function clearArrow(){if(arrow){arrow.remove();arrow=null;}}
   function scan(){
