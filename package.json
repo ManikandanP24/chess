@@ -6,7 +6,8 @@
   "license": "GPL-3.0",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "build:web": "node scripts/build-web.js"
   },
   "dependencies": {
     "chess.js": "^1.4.0",
@@ -14,7 +15,8 @@
   },
   "devDependencies": {
     "electron": "^38.0.0",
-    "electron-builder": "^26.0.0"
+    "electron-builder": "^26.0.0",
+    "esbuild": "^0.25.0"
   },
   "build": {
     "appId": "com.manikandanp24.chesshelper",
@@ -30,8 +32,20 @@
       "node_modules/stockfish/**/*",
       "package.json"
     ],
-    "win": { "target": ["nsis"] },
-    "mac": { "target": ["dmg"] },
-    "linux": { "target": ["AppImage"] }
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
   }
 }
