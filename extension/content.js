@@ -3,7 +3,7 @@
   window.__chessHelperInstalled = true;
 
   const PIECES = {wk:'K',wq:'Q',wr:'R',wb:'B',wn:'N',wp:'P',bk:'k',bq:'q',br:'r',bb:'b',bn:'n',bp:'p'};
-  let panel, worker, arrow, currentFen = '', lastMove = null, auto = true, depth = 24, busy = false, pending = null, ready = false, uciReady = false;
+  let panel, worker, arrow, currentFen = '', lastMove = null, auto = true, depth = 14, busy = false, pending = null, ready = false, uciReady = false;
   const style = document.createElement('style');
   style.textContent = `
     #ch-helper-panel{position:fixed;right:16px;top:115px;width:250px;z-index:2147483647;background:#171923;color:#edf0f6;border:1px solid #42485b;border-radius:13px;box-shadow:0 10px 35px #0008;font:13px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;transition:width .16s,height .16s,border-radius .16s}
@@ -78,7 +78,7 @@
         if(!uci||uci==='(none)'){status('No legal move found.');return;}
         lastMove={from:uci.slice(0,2),to:uci.slice(2,4),uci};
         panel.querySelector('#ch-move').textContent=lastMove.from+' → '+lastMove.to;
-        panel.querySelector('#ch-detail').textContent='Strongest move found by Stockfish';
+        panel.querySelector('#ch-detail').textContent='Stockfish quick analysis · ~1.2 sec';
         drawArrow(lastMove);status('Best move ready');
       } else if(line.startsWith('info depth ')){
         const m=line.match(/\\bdepth\\s+(\\d+)/);if(m)status('Analyzing… depth '+m[1]);
@@ -109,7 +109,7 @@
     panel.querySelector('#ch-detail').textContent='Stockfish is calculating';
     status('Analyzing position…');
     worker.postMessage('position fen '+fen);
-    worker.postMessage('go depth '+depth);
+    worker.postMessage('go movetime 1200');
   }
   function drawArrow(move){
     clearArrow();const board=findBoard();if(!board)return;
