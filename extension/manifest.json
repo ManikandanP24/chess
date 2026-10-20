@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "Chess Helper — Best Move",
+  "version": "1.0.0",
+  "description": "Analyze Chess.com positions with Stockfish and display a best-move arrow.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://www.chess.com/*"
+  ],
+  "action": {
+    "default_title": "Chess Helper",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.chess.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "vendor/stockfish-19-lite-single.js",
+        "vendor/stockfish-19-lite-single.wasm"
+      ],
+      "matches": [
+        "https://www.chess.com/*"
+      ]
+    }
+  ]
+}
