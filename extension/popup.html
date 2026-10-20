@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Chess Helper</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <main class="app">
+    <header><span class="knight">♞</span><div><strong>Chess Helper</strong><small>CHESS.COM ANALYSIS</small></div><span id="status" class="status">Ready</span></header>
+    <section class="actions">
+      <button id="bestMove" class="primary">↗ Find Best Move</button>
+      <button id="clearArrow" class="secondary">Clear arrow</button>
+    </section>
+    <label for="fen">Position (FEN)</label>
+    <textarea id="fen" rows="3" spellcheck="false" placeholder="Read from Chess.com or paste a FEN position"></textarea>
+    <div class="row"><label for="depth">Analysis depth <b id="depthLabel">12</b></label><input id="depth" type="range" min="8" max="18" value="12"></div>
+    <section id="result" class="result"><div class="muted">Open a Chess.com game, then click Find Best Move.</div></section>
+    <button id="copyFen" class="secondary full">Copy FEN</button>
+    <div class="practice"><label><input id="autoMove" type="checkbox"> Auto-move in bot games / puzzles</label><p>Auto-move is only enabled on recognized practice pages, not live games against people.</p></div>
+    <footer>Stockfish runs locally in your browser.</footer>
+  </main>
+  <script src="popup.js"></script>
+</body>
+</html>
