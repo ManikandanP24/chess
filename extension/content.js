@@ -3,10 +3,10 @@
   window.__chessHelperInstalled = true;
 
   const PIECES = {wk:'K',wq:'Q',wr:'R',wb:'B',wn:'N',wp:'P',bk:'k',bq:'q',br:'r',bb:'b',bn:'n',bp:'p'};
-  let panel, worker, arrow, currentFen = '', lastMove = null, auto = true, depth = 12, busy = false, pending = null, ready = false, uciReady = false;
+  let panel, worker, arrow, currentFen = '', lastMove = null, auto = true, depth = 24, busy = false, pending = null, ready = false, uciReady = false;
   const style = document.createElement('style');
   style.textContent = `
-    #ch-helper-panel{position:fixed;right:16px;top:115px;width:250px;z-index:2147483647;background:#171923;color:#edf0f6;border:1px solid #42485b;border-radius:13px;box-shadow:0 10px 35px #0008;font:13px/1.4 system-ui,-apple-system,Segoe UI,sans-serif}
+    #ch-helper-panel{position:fixed;right:16px;top:115px;width:250px;z-index:2147483647;background:#171923;color:#edf0f6;border:1px solid #42485b;border-radius:13px;box-shadow:0 10px 35px #0008;font:13px/1.4 system-ui,-apple-system,Segoe UI,sans-serif;transition:width .16s,height .16s,border-radius .16s}
     #ch-helper-panel *{box-sizing:border-box}#ch-helper-panel .ch-head{display:flex;align-items:center;gap:8px;padding:12px;border-bottom:1px solid #34394a;cursor:move}
     #ch-helper-panel .ch-logo{font-size:24px;color:#f5c979}#ch-helper-panel .ch-title{font-weight:800;font-size:14px;flex:1}#ch-helper-panel .ch-sub{font-size:9px;letter-spacing:1px;color:#a4abc0}
     #ch-helper-panel button{border:0;border-radius:7px;padding:8px 10px;font-weight:700;cursor:pointer;background:#f5c979;color:#171923}
@@ -16,7 +16,7 @@
     #ch-helper-panel .ch-depth{display:flex;justify-content:space-between;align-items:center;margin:10px 0 5px}#ch-helper-panel input[type=range]{width:100%;accent-color:#f5c979}
     #ch-helper-panel .ch-toggle{display:flex;align-items:center;gap:7px;margin-top:11px;font-size:12px}#ch-helper-panel input[type=checkbox]{accent-color:#f5c979}
     #ch-helper-panel .ch-footer{font-size:10px;color:#9098ad;margin-top:9px}
-    #ch-helper-panel.ch-min .ch-body{display:none}
+    #ch-helper-panel.ch-min{width:56px;height:56px;border-radius:50%;overflow:hidden;background:#171923;border:2px solid #f5c979}#ch-helper-panel.ch-min .ch-body{display:none}#ch-helper-panel.ch-min .ch-head{height:100%;padding:0;justify-content:center;border:0;gap:0}#ch-helper-panel.ch-min .ch-logo{font-size:30px;line-height:1}#ch-helper-panel.ch-min .ch-brand{display:none}#ch-helper-panel.ch-min .ch-close{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}#ch-helper-panel.ch-min .ch-head:hover{background:#292d3b}
   `;
   document.documentElement.appendChild(style);
 
@@ -40,14 +40,15 @@
   }
   function makePanel(){
     panel=document.createElement('section');panel.id='ch-helper-panel';
-    panel.innerHTML='<header class="ch-head"><span class="ch-logo">♞</span><div style="flex:1"><div class="ch-title">Chess Helper</div><div class="ch-sub">BEST MOVE ASSISTANT</div></div><button class="ch-close" id="ch-min">−</button></header><div class="ch-body"><button class="ch-primary" id="ch-analyze">↗ Find Best Move</button><div class="ch-status" id="ch-status">Reading chessboard…</div><div class="ch-result"><div class="ch-muted">Recommended move</div><div class="ch-move" id="ch-move">—</div><div class="ch-muted" id="ch-detail">Best move arrow appears on the board</div></div><div class="ch-depth"><label for="ch-depth">Analysis depth</label><b id="ch-depth-label">12</b></div><input id="ch-depth" type="range" min="8" max="18" value="12"><label class="ch-toggle"><input type="checkbox" id="ch-auto" checked> Automatically update as the position changes</label><div class="ch-footer">For study and practice. Avoid using move assistance in live games against people.</div></div>';
+    panel.innerHTML='<header class="ch-head"><span class="ch-logo">♞</span><div class="ch-brand" style="flex:1"><div class="ch-title">Chess Helper</div><div class="ch-sub">BEST MOVE ASSISTANT</div></div><button class="ch-close" id="ch-min" aria-label="Minimize or restore">−</button></header><div class="ch-body"><button class="ch-primary" id="ch-analyze">↗ Find Best Move</button><div class="ch-status" id="ch-status">Reading chessboard…</div><div class="ch-result"><div class="ch-muted">Recommended move</div><div class="ch-move" id="ch-move">—</div><div class="ch-muted" id="ch-detail">Best move arrow appears on the board</div></div><label class="ch-toggle"><input type="checkbox" id="ch-auto" checked> Automatically update best move</label><div class="ch-footer">High-strength Stockfish analysis. For study and practice.</div></div>';
     document.body.appendChild(panel);
     panel.querySelector('#ch-analyze').addEventListener('click',()=>{const p=getPosition();if(p)analyze(p.fen,true);else status('Could not read board pieces. Refresh Chess.com and try again.',true);});
-    panel.querySelector('#ch-min').addEventListener('click',()=>panel.classList.toggle('ch-min'));
-    panel.querySelector('#ch-depth').addEventListener('input',e=>{depth=+e.target.value;panel.querySelector('#ch-depth-label').textContent=depth;});
-    panel.querySelector('#ch-auto').addEventListener('change',e=>{auto=e.target.checked;if(auto){const p=getPosition();if(p)analyze(p.fen,false);}});
+    panel.querySelector('#ch-min').addEventListener('click',()=>{panel.classList.toggle('ch-min');panel.querySelector('#ch-min').textContent=panel.classList.contains('ch-min')?'♞':'−';});
+    panel.querySelector('#ch-auto').addEventListener('change',e=>{auto=e.target.checked;panel.querySelector('#ch-analyze').style.display=auto?'none':'block';if(auto){const p=getPosition();if(p)analyze(p.fen,false);}});
+    panel.querySelector('#ch-analyze').style.display=auto?'none':'block';
     // Drag the panel by its header.
     const head=panel.querySelector('.ch-head');let drag=null;
+    head.addEventListener('click',e=>{if(panel.classList.contains('ch-min')&&!e.target.closest('button')){panel.classList.remove('ch-min');panel.querySelector('#ch-min').textContent='−';}});
     head.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;const r=panel.getBoundingClientRect();drag={x:e.clientX-r.left,y:e.clientY-r.top};head.setPointerCapture(e.pointerId);});
     head.addEventListener('pointermove',e=>{if(!drag)return;panel.style.left=Math.max(0,e.clientX-drag.x)+'px';panel.style.top=Math.max(0,e.clientY-drag.y)+'px';panel.style.right='auto';});
     head.addEventListener('pointerup',()=>{drag=null;});
@@ -77,7 +78,7 @@
         if(!uci||uci==='(none)'){status('No legal move found.');return;}
         lastMove={from:uci.slice(0,2),to:uci.slice(2,4),uci};
         panel.querySelector('#ch-move').textContent=lastMove.from+' → '+lastMove.to;
-        panel.querySelector('#ch-detail').textContent='Engine move · depth '+depth;
+        panel.querySelector('#ch-detail').textContent='Strongest move found by Stockfish';
         drawArrow(lastMove);status('Best move ready');
       } else if(line.startsWith('info depth ')){
         const m=line.match(/\\bdepth\\s+(\\d+)/);if(m)status('Analyzing… depth '+m[1]);
